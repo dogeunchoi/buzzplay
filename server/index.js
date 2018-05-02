@@ -1,5 +1,8 @@
 import express from 'express'
-import { Nuxt, Builder } from 'nuxt'
+import {
+    Nuxt,
+    Builder
+} from 'nuxt'
 
 import http from 'http'
 import socketio from 'socket.io'
@@ -38,36 +41,68 @@ app.use(nuxt.render)
 server.listen(port, host)
 console.log('Server listening on ' + host + ':' + port) // eslint-disable-line no-console
 
-let userCounts = 0
-let userLists = []
+let userStatus = {}
+let step = 0
 
 io.on('connection', (socket) => {
     let isEntered = false
 
     socket.on('enter', (data) => {
         if (!isEntered) {
-            userCounts++
             socket.name = data.name
-            userLists.push(socket.name)
+            socket.ready = false
+            userStatus[socket.name] = false
         }
 
         isEntered = true
 
-        socket.broadcast.emit('login', { userCounts, name: data.name, userLists })
+        socket.broadcast.emit('login', {
+            name: socket.name,
+            userStatus,
+            step
+        })
+
+        socket.emit('initilize status', {
+            step
+        })
     })
 
-    socket.broadcast.emit('leader entered', { userCounts, userLists })
+    socket.on('leader entered', (data) => {
+        io.emit('leader entered', {
+            userStatus,
+            step
+        })
+    })
+
+    socket.on('go to next step', (data) => {
+        if (data && data.step) {
+            step = data.step
+        }
+
+        socket.broadcast.emit('initilize status', {
+            step
+        })
+    })
+
+    socket.on('user chagned ready status', (data) => {
+        if (isEntered) {
+            socket.ready = data.ready
+            userStatus[socket.name] = socket.ready
+
+            socket.broadcast.emit('ready updated', {
+                userStatus
+            })
+        }
+    })
 
     socket.on('disconnect', () => {
         if (isEntered) {
-            userCounts--
-            for (let i = 0; i < userLists.length; i++) {
-                if (userLists[i] == socket.name) {
-                    userLists.splice(i, 1)
-                    break
-                }
-            }
-            socket.broadcast.emit('logout', { userCounts, name: socket.name, userLists })
+            delete userStatus[socket.name]
+
+            socket.broadcast.emit('logout', {
+                name: socket.name,
+                userStatus
+            })
         }
     })
 })

@@ -22,5 +22,8 @@ module.exports = {
      */
     build: {
         vendor: ['axios'],
-    }
+    },
+    plugins: [
+        '~/plugins/socket.io.js'
+    ]
 }
