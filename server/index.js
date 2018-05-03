@@ -13,7 +13,7 @@ const app = express()
 const server = http.Server(app)
 const io = socketio(server)
 
-const host = '192.168.0.13' || process.env.HOST || '127.0.0.1'
+const host = process.env.HOST || '127.0.0.1'
 const port = process.env.PORT || 3000
 
 app.set('port', port)
