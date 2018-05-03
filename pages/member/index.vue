@@ -51,7 +51,7 @@
     created() {
       this.name = this.$route.query.name
     },
-    beforeMount() {
+    beforeMount() {      
       socket.emit('enter', {
         name: this.name
       })
@@ -59,10 +59,14 @@
       socket.on('initilize status', (data) => {
         this.ready = false
         this.step = data.step
+
         socket.emit('user chagned ready status', {
           ready: false
         })
       })
+    },
+    destroyed() {
+      socket.emit('logout')
     }
   }
 </script>

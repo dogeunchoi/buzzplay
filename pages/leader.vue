@@ -106,6 +106,7 @@
             socket.emit('leader entered')
     
             socket.on('login', (data) => {
+                console.log('@login on leader', data)
                 this.userStatus = data.userStatus
             })
     

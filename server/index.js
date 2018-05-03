@@ -13,7 +13,7 @@ const app = express()
 const server = http.Server(app)
 const io = socketio(server)
 
-const host = process.env.HOST || '127.0.0.1'
+const host = '192.168.0.13' || process.env.HOST || '127.0.0.1'
 const port = process.env.PORT || 3000
 
 app.set('port', port)
@@ -48,11 +48,15 @@ io.on('connection', (socket) => {
     let isEntered = false
 
     socket.on('enter', (data) => {
-        if (!isEntered) {
-            socket.name = data.name
-            socket.ready = false
-            userStatus[socket.name] = false
+        if (isEntered) {
+            try {
+                delete userStatus[socket.name]
+            } catch (err) {}
         }
+
+        socket.name = data.name
+        socket.ready = false
+        userStatus[socket.name] = false
 
         isEntered = true
 
@@ -90,6 +94,17 @@ io.on('connection', (socket) => {
             userStatus[socket.name] = socket.ready
 
             socket.broadcast.emit('ready updated', {
+                userStatus
+            })
+        }
+    })
+
+    socket.on('logout', () => {
+        if (isEntered) {
+            delete userStatus[socket.name]
+
+            socket.broadcast.emit('logout', {
+                name: socket.name,
                 userStatus
             })
         }

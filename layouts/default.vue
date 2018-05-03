@@ -20,7 +20,12 @@ export default {
 {
   margin: 0;
   width: 100%;
-  padding: 100px 0;
+  height: 100%;
+  padding: 80px 0 0 0;
+  /* display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row; */
   text-align: center;
 }
 
