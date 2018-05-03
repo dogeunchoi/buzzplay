@@ -1,4 +1,4 @@
 import io from 'socket.io-client'
-const socket = io(process.env.HOST || '127.0.0.1')
+const socket = io(process.env.HOST || 'http://127.0.0.1:3000')
 
 export default socket
